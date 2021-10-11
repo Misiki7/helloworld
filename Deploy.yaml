@@ -1,0 +1,47 @@
+# 部署工作负载
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # 负载名称
+  name: deployment-hello-world-test
+spec:
+  selector:
+    matchLabels:
+      # 选择器 选择标签
+      app: hello-world
+  # pod 数量
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: hello-world  # 标签
+    spec:
+      containers:
+        - name: hello-world  # 容器名称
+          image: harbor.dev.wh.digitalchina.com/deploytest/hello-world  # 镜像
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080  # 端口号
+              name: helloworld  # 名称
+              protocol: TCP  # 协议
+      dnsPolicy: ClusterFirst  # dRancherNamespace规则
+---
+# 创建Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    cattle.io/creator: norman
+  name: service-hello-world-test  # service名称
+spec:
+  ports:
+    - nodePort: 31022
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: hello-world
+  type: NodePort
+
+
+
